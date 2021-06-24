@@ -1,0 +1,349 @@
+{
+  "zabbix_export": {
+    "version": "4.4",
+    "date": "2020-04-30T08:52:36Z",
+    "groups": [
+      {
+        "name": "Templates"
+      }
+    ],
+    "templates": [
+      {
+        "template": "Template InfoSec - Github",
+        "name": "Template InfoSec - Github",
+        "groups": [
+          {
+            "name": "Templates"
+          }
+        ],
+        "applications": [
+          {
+            "name": "Github"
+          }
+        ],
+        "items": [
+          {
+            "name": "Github_Members_Admins",
+            "key": "mbsec.security.github_org[{$GITHUB_ORG},members,admin]",
+            "delay": "30m",
+            "history": "7d",
+            "description": "Parameter1: Organization ID to be monitored. It is defined in a Macro.\r\nParameter2: What property to be consulted. Could be:\r\n   - repos\r\n   - members\r\nParameter3: Filter to be used according the API documentation.",
+            "applications": [
+              {
+                "name": "Github"
+              }
+            ]
+          },
+          {
+            "name": "Github_Members",
+            "key": "mbsec.security.github_org[{$GITHUB_ORG},members,all]",
+            "delay": "30m",
+            "history": "7d",
+            "description": "Parameter1: Organization ID to be monitored. It is defined in a Macro.\r\nParameter2: What property to be consulted. Could be:\r\n   - repos\r\n   - members\r\nParameter3: Filter to be used according the API documentation.",
+            "applications": [
+              {
+                "name": "Github"
+              }
+            ]
+          },
+          {
+            "name": "Github_Outside_Collaborators",
+            "key": "mbsec.security.github_org[{$GITHUB_ORG},outsiders,all]",
+            "delay": "30m",
+            "history": "7d",
+            "description": "Parameter1: Organization ID to be monitored. It is defined in a Macro.\r\nParameter2: What property to be consulted. Could be:\r\n   - repos\r\n   - members\r\nParameter3: Filter to be used according the API documentation.",
+            "applications": [
+              {
+                "name": "Github"
+              }
+            ]
+          },
+          {
+            "name": "Github_Repositories",
+            "key": "mbsec.security.github_org[{$GITHUB_ORG},repos,all]",
+            "delay": "4h",
+            "history": "7d",
+            "description": "Parameter1: Organization ID to be monitored. It is defined in a Macro.\r\nParameter2: What property to be consulted. Could be:\r\n   - repos\r\n   - members\r\nParameter3: Filter to be used according the API documentation.",
+            "applications": [
+              {
+                "name": "Github"
+              }
+            ]
+          },
+          {
+            "name": "Github_Repositories_Public",
+            "key": "mbsec.security.github_org[{$GITHUB_ORG},repos,public]",
+            "delay": "4h",
+            "history": "7d",
+            "description": "Parameter1: Organization ID to be monitored. It is defined in a Macro.\r\nParameter2: What property to be consulted. Could be:\r\n   - repos\r\n   - members\r\nParameter3: Filter to be used according the API documentation.",
+            "applications": [
+              {
+                "name": "Github"
+              }
+            ]
+          }
+        ],
+        "discovery_rules": [
+          {
+            "name": "Github_Repositories",
+            "key": "mbsec.security.github_discovery[{$GITHUB_ORG}]",
+            "delay": "1d",
+            "description": "Get a list of all repositories on a specific organization.\r\nCreate several items automatically based on this query.\r\n\r\n1 - This query will return a dict in json format containing the follow keys:\r\n   GITHUB_REPO_FULLNAME  = Repository Full Name.\r\n   GITHUB_REPO_TITLE            = Repository Short Name.",
+            "item_prototypes": [
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info_Events",
+                "type": "DEPENDENT",
+                "key": "mbsec.security.github_repoinfo.events.[{#GITHUB_REPO_TITLE}]",
+                "delay": "0",
+                "history": "7d",
+                "description": "Preprocessing rule receives a csv string with 7 fields:\r\n\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events (from the last 90 days)\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ],
+                "preprocessing": [
+                  {
+                    "type": "REGEX",
+                    "params": "^(.*),(.*),(.*),(.*),(.*),(.*),(.*)\n\\6"
+                  }
+                ],
+                "master_item": {
+                  "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]"
+                }
+              },
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info_Forks",
+                "type": "DEPENDENT",
+                "key": "mbsec.security.github_repoinfo.forks.[{#GITHUB_REPO_TITLE}]",
+                "delay": "0",
+                "history": "7d",
+                "description": "Preprocessing rule receives a csv string with 7 fields:\r\n\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ],
+                "preprocessing": [
+                  {
+                    "type": "REGEX",
+                    "params": "^(.*),(.*),(.*),(.*),(.*),(.*),(.*)\n\\1"
+                  }
+                ],
+                "master_item": {
+                  "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]"
+                }
+              },
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info_LastUpdate",
+                "type": "DEPENDENT",
+                "key": "mbsec.security.github_repoinfo.lastupdate.[{#GITHUB_REPO_TITLE}]",
+                "delay": "0",
+                "history": "7d",
+                "trends": "0",
+                "value_type": "TEXT",
+                "description": "Preprocessing rule receives a csv string with 7 fields:\r\n\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events (from the last 90 days)\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ],
+                "preprocessing": [
+                  {
+                    "type": "REGEX",
+                    "params": "^(.*),(.*),(.*),(.*),(.*),(.*),(.*)\n\\7"
+                  }
+                ],
+                "master_item": {
+                  "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]"
+                }
+              },
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info_OpenIssues",
+                "type": "DEPENDENT",
+                "key": "mbsec.security.github_repoinfo.openissues.[{#GITHUB_REPO_TITLE}]",
+                "delay": "0",
+                "history": "7d",
+                "description": "Preprocessing rule receives a csv string with 7 fields:\r\n\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ],
+                "preprocessing": [
+                  {
+                    "type": "REGEX",
+                    "params": "^(.*),(.*),(.*),(.*),(.*),(.*),(.*)\n\\4"
+                  }
+                ],
+                "master_item": {
+                  "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]"
+                }
+              },
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info_Private",
+                "type": "DEPENDENT",
+                "key": "mbsec.security.github_repoinfo.private.[{#GITHUB_REPO_TITLE}]",
+                "delay": "0",
+                "history": "7d",
+                "trends": "0",
+                "value_type": "TEXT",
+                "description": "Preprocessing rule receives a csv string with 7 fields:\r\n\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ],
+                "preprocessing": [
+                  {
+                    "type": "REGEX",
+                    "params": "^(.*),(.*),(.*),(.*),(.*),(.*),(.*)\n\\5"
+                  }
+                ],
+                "master_item": {
+                  "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]"
+                },
+                "trigger_prototypes": [
+                  {
+                    "expression": "{diff()}=1",
+                    "recovery_mode": "NONE",
+                    "name": "Github_{#GITHUB_REPO_TITLE}_Private_Status_Changed",
+                    "priority": "HIGH",
+                    "description": "High alert if the Private status is changed."
+                  }
+                ]
+              },
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info_Subscribers",
+                "type": "DEPENDENT",
+                "key": "mbsec.security.github_repoinfo.subscribers.[{#GITHUB_REPO_TITLE}]",
+                "delay": "0",
+                "history": "7d",
+                "description": "Preprocessing rule receives a csv string with 7 fields:\r\n\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ],
+                "preprocessing": [
+                  {
+                    "type": "REGEX",
+                    "params": "^(.*),(.*),(.*),(.*),(.*),(.*),(.*)\n\\3"
+                  }
+                ],
+                "master_item": {
+                  "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]"
+                }
+              },
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info_Watchers",
+                "type": "DEPENDENT",
+                "key": "mbsec.security.github_repoinfo.watchers.[{#GITHUB_REPO_TITLE}]",
+                "delay": "0",
+                "history": "7d",
+                "description": "Preprocessing rule receives a csv string with 7 fields:\r\n\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ],
+                "preprocessing": [
+                  {
+                    "type": "REGEX",
+                    "params": "^(.*),(.*),(.*),(.*),(.*),(.*),(.*)\n\\2"
+                  }
+                ],
+                "master_item": {
+                  "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]"
+                }
+              },
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info",
+                "key": "mbsec.security.github_repoinfo[{#GITHUB_REPO_FULLNAME}]",
+                "delay": "15m",
+                "history": "7d",
+                "trends": "0",
+                "value_type": "TEXT",
+                "description": "Returned Fields:\r\n1 - forks_count\r\n2 - watchers_count\r\n3 - subscribers_count\r\n4 - open_issues_count\r\n5 - private\r\n6 - events\r\n7 - updated_at",
+                "applications": [
+                  {
+                    "name": "Github"
+                  }
+                ]
+              }
+            ],
+            "graph_prototypes": [
+              {
+                "name": "Github_{#GITHUB_REPO_TITLE}_Info",
+                "graph_items": [
+                  {
+                    "color": "1A7C11",
+                    "item": {
+                      "host": "Template InfoSec - Github",
+                      "key": "mbsec.security.github_repoinfo.events.[{#GITHUB_REPO_TITLE}]"
+                    }
+                  },
+                  {
+                    "sortorder": "1",
+                    "color": "F63100",
+                    "item": {
+                      "host": "Template InfoSec - Github",
+                      "key": "mbsec.security.github_repoinfo.forks.[{#GITHUB_REPO_TITLE}]"
+                    }
+                  },
+                  {
+                    "sortorder": "2",
+                    "color": "2774A4",
+                    "item": {
+                      "host": "Template InfoSec - Github",
+                      "key": "mbsec.security.github_repoinfo.openissues.[{#GITHUB_REPO_TITLE}]"
+                    }
+                  },
+                  {
+                    "sortorder": "3",
+                    "color": "A54F10",
+                    "item": {
+                      "host": "Template InfoSec - Github",
+                      "key": "mbsec.security.github_repoinfo.subscribers.[{#GITHUB_REPO_TITLE}]"
+                    }
+                  },
+                  {
+                    "sortorder": "4",
+                    "color": "FC6EA3",
+                    "item": {
+                      "host": "Template InfoSec - Github",
+                      "key": "mbsec.security.github_repoinfo.watchers.[{#GITHUB_REPO_TITLE}]"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "macros": [
+          {
+            "macro": "{$GITHUB_ORG}",
+            "value": "CHANGE_ME",
+            "description": "Organization ID to be monitored."
+          }
+        ]
+      }
+    ],
+    "triggers": [
+      {
+        "expression": "{Template InfoSec - Github:mbsec.security.github_org[{$GITHUB_ORG},members,all].abschange()}>=1 or {Template InfoSec - Github:mbsec.security.github_org[{$GITHUB_ORG},members,admin].abschange()}>=1 or {Template InfoSec - Github:mbsec.security.github_org[{$GITHUB_ORG},outsiders,all].abschange()}>=1",
+        "recovery_mode": "NONE",
+        "name": "Github_Members_Change",
+        "priority": "WARNING",
+        "description": "High alert if the number of members changes.\r\nThe alert includes outside collaborators."
+      },
+      {
+        "expression": "{Template InfoSec - Github:mbsec.security.github_org[{$GITHUB_ORG},repos,all].abschange()}>=1 or {Template InfoSec - Github:mbsec.security.github_org[{$GITHUB_ORG},repos,public].abschange()}>=1",
+        "recovery_mode": "NONE",
+        "name": "Github_Repositories_Change",
+        "priority": "WARNING",
+        "description": "High alert if the number of repositories changes."
+      }
+    ]
+  }
+}
